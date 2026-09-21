@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+# uv
+.uv/
+uv.lock.bak
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
