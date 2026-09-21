@@ -57,4 +57,16 @@ uv run pytest -q
 |---|---|---|
 | `LINE_CHANNEL_SECRET` | yes | Channel secret (signature verification) |
 | `LINE_CHANNEL_ACCESS_TOKEN` | yes | Channel access token (reply API) |
+| `LINE_ALLOWED_USER_IDS` | no | Comma-separated LINE user IDs; empty = allow all |
 | `PORT` | no | Default `8000` |
+
+## Whitelist
+
+Set `LINE_ALLOWED_USER_IDS` to your own LINE user ID so the bot only replies to you:
+
+```bash
+LINE_ALLOWED_USER_IDS=Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+To find your user ID, temporarily leave the whitelist empty, send the bot a message,
+and check the server logs / webhook event JSON (`source.userId`).

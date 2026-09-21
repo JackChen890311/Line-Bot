@@ -50,10 +50,18 @@ class EchoBot:
         """Verify signature and dispatch to registered handlers. Raises on bad signature."""
         self.handler.handle(body, signature)
 
+    def is_sender_allowed(self, user_id: str | None) -> bool:
+        """Delegate to settings whitelist."""
+        return self.settings.is_user_allowed(user_id)
+
     # -- internal wiring --
     def _register_handlers(self) -> None:
         @self.handler.add(MessageEvent, message=TextMessageContent)
         def _handle_text_message(event: MessageEvent) -> None:
             assert isinstance(event.message, TextMessageContent)
+            user_id = getattr(event.source, "user_id", None)
+            if not self.is_sender_allowed(user_id):
+                logger.warning("Ignoring message from non-whitelisted user: %s", user_id)
+                return
             logger.info("Echoing message: %s", event.message.text)
             self.reply_text(event.reply_token, event.message.text)
