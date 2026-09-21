@@ -63,5 +63,7 @@ class EchoBot:
             if not self.is_sender_allowed(user_id):
                 logger.warning("Ignoring message from non-whitelisted user: %s", user_id)
                 return
-            logger.info("Echoing message: %s", event.message.text)
-            self.reply_text(event.reply_token, event.message.text)
+            logger.info("User: %s", event.message.text)
+            reply = "你說：" + event.message.text
+            logger.info("Bot: %s", reply)
+            self.reply_text(event.reply_token, reply)

@@ -19,7 +19,12 @@ class LineBotApp:
     def __init__(self, settings: Settings | None = None) -> None:
         self.settings = settings or Settings()
         self.bot = EchoBot(self.settings)
-        self.app = FastAPI(title="line-bot (echo)")
+        self.app = FastAPI(
+            title="line-bot (echo)",
+            docs_url=None,
+            redoc_url=None,
+            openapi_url=None,
+        )
         self._register_routes()
 
     def _register_routes(self) -> None:
@@ -36,12 +41,12 @@ class LineBotApp:
             x_line_signature: str = Header(default=""),
         ) -> dict[str, str]:
             body = (await request.body()).decode("utf-8")
-            logger.info("Webhook body: %s", body)
             try:
                 bot.handle_webhook(body, x_line_signature)
             except InvalidSignatureError:
                 logger.warning("Invalid X-Line-Signature")
                 raise HTTPException(status_code=400, detail="Invalid signature")
+            logger.info("Webhook handled (%d bytes)", len(body))
             return {"status": "ok"}
 
     def get_app(self) -> FastAPI:
