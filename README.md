@@ -1,6 +1,6 @@
-# LINE Echo Bot (FastAPI + uv)
+# LINE Bot
 
-Simple OOP echo bot using `line-bot-sdk` v3. Replies with the same text it receives.
+Simple LINE bot using `line-bot-sdk` v3. Runs on my raspberry pi 2 model B using ngrok.
 
 ## Layout
 
