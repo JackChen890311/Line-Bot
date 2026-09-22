@@ -10,6 +10,7 @@ Simple LINE bot using `line-bot-sdk` v3. Runs on my raspberry pi 2 model B using
 │   ├── __init__.py
 │   ├── app.py      # LineBotApp (FastAPI factory, routes)
 │   ├── bot.py      # EchoBot (webhook intake + background reply pipeline)
+│   ├── agent.py    # AgentRunner (OpenRouter primary + fallback + quota msg)
 │   ├── config.py   # Settings (pydantic-settings, .env)
 │   └── store.py    # HistoryLog + PendingStore (local file persistence)
 ├── data/           # gitignored: history/*.jsonl, pending/*.json
@@ -65,6 +66,10 @@ uv run pytest -q
 | `SLOW_THRESHOLD_SECONDS` | no | Wait before ask-again notice; default `25` |
 | `FETCH_KEYWORD` | no | Keyword to fetch a parked answer; default `繼續` |
 | `DEBUG_SLOW_SECONDS` | no | Artificial generation delay for testing; default `0` |
+| `AGENT_ENABLED` | no | `true` = LLM agent, `false` = echo stub |
+| `OPENROUTER_API_KEY` | agent only | OpenRouter key (free tier, no card needed) |
+| `LLM_MODEL` | no | Primary model slug; default Qwen 3 Next 80B free |
+| `LLM_FALLBACK_MODEL` | no | Fallback on 429/errors; default `openrouter/free` |
 
 ## Whitelist
 
@@ -93,3 +98,13 @@ generations without the Push API:
 Every inbound/outbound message is appended to `data/history/<user>.jsonl`
 (audit trail only — never loaded into prompts). Test the slow path with
 `DEBUG_SLOW_SECONDS=30`.
+
+## LLM agent (Phase 2)
+
+Set `AGENT_ENABLED=true` + `OPENROUTER_API_KEY` and replies come from the
+agent (`langchain` `create_agent` + `ChatOpenRouter`, no tools yet).
+Switching models is one `.env` line (`LLM_MODEL`); on 429/errors it retries
+`LLM_FALLBACK_MODEL`, and on exhausted quota it replies
+「今天的免費額度用完了」instead of going silent. Without a key it falls back
+to the echo stub with a warning. Note the free tier is ~50 reqs/day
+(~10–15 messages, each turn costs several calls).

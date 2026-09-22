@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 import threading
 import time
+from typing import Any
 
 from linebot.v3 import WebhookHandler
 from linebot.v3.messaging import (
@@ -46,6 +47,8 @@ class EchoBot:
         self.pending = PendingStore(settings.data_dir)
         self._seen_ids: dict[str, float] = {}
         self._seen_lock = threading.Lock()
+        self._agent_runner: Any = None
+        self._agent_warned = False
         self._register_handlers()
 
     # -- pure business logic (easy to unit test, no network) --
@@ -54,12 +57,32 @@ class EchoBot:
         """Return the reply message(s) for a given inbound text."""
         return [TextMessage(text=text)]
 
-    # -- generation (Phase 1 stub; Phase 2 swaps in the LLM agent) --
+    # -- generation (LLM agent when enabled + keyed, else echo stub) --
     def generate_reply(self, user_id: str | None, text: str) -> str:
         """Produce the answer text. May be slow; callers race it against the token TTL."""
         if self.settings.debug_slow_seconds > 0:
             time.sleep(self.settings.debug_slow_seconds)
-        return "你說：" + text
+        runner = self._get_agent_runner()
+        if runner is None:
+            return "你說：" + text
+        return runner.run(text)
+
+    def _get_agent_runner(self) -> Any | None:
+        """Lazy-build the agent; echo stub when disabled or unkeyed. Never raises."""
+        if not self.settings.agent_enabled or not self.settings.openrouter_api_key:
+            if not self._agent_warned:
+                self._agent_warned = True
+                logger.warning("Agent disabled or OPENROUTER_API_KEY missing; using echo stub")
+            return None
+        if self._agent_runner is None:
+            from line_bot.agent import AgentRunner  # lazy: langchain import is heavy
+
+            try:
+                self._agent_runner = AgentRunner.from_settings(self.settings)
+            except Exception:
+                logger.exception("Agent init failed; using echo stub")
+                return None
+        return self._agent_runner
 
     # -- LINE API interaction --
     def reply_text(self, reply_token: str, text: str) -> None:

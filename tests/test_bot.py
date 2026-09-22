@@ -126,3 +126,24 @@ def test_is_duplicate():
     assert bot._is_duplicate("e1") is False
     assert bot._is_duplicate("e1") is True
     assert bot._is_duplicate(None) is False
+
+
+def test_agent_disabled_falls_back_to_echo(tmp_path):
+    bot, sent = _bot(tmp_path, agent_enabled=False, openrouter_api_key="k")
+    bot._process("U1", "tok", "hi")
+    assert sent == [("tok", "你說：hi")]
+
+
+def test_agent_path_uses_runner(tmp_path):
+    bot, sent = _bot(
+        tmp_path, agent_enabled=True, openrouter_api_key="k", slow_threshold_seconds=5
+    )
+
+    class FakeRunner:
+        def run(self, text):
+            assert text == "hi"
+            return "agent says hi"
+
+    bot._agent_runner = FakeRunner()  # skip real init
+    bot._process("U1", "tok", "hi")
+    assert sent == [("tok", "agent says hi")]

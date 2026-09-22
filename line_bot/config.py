@@ -10,6 +10,10 @@ Optional:
     SLOW_THRESHOLD_SECONDS (background wait before ask-again notice; default 25)
     FETCH_KEYWORD          (keyword to fetch a pending answer; default 繼續)
     DEBUG_SLOW_SECONDS     (artificial generation delay for testing; default 0)
+    AGENT_ENABLED          (use LLM agent instead of echo stub; default true)
+    OPENROUTER_API_KEY     (required when AGENT_ENABLED=true)
+    LLM_MODEL              (primary model slug; default Qwen 3 Next 80B free)
+    LLM_FALLBACK_MODEL     (fallback on 429/errors; default openrouter/free router)
 """
 
 from __future__ import annotations
@@ -28,6 +32,10 @@ class Settings(BaseSettings):
     slow_threshold_seconds: float = 25.0
     fetch_keyword: str = "繼續"
     debug_slow_seconds: float = 0.0
+    agent_enabled: bool = True
+    openrouter_api_key: str = ""
+    llm_model: str = "qwen/qwen3-next-80b-a3b-instruct:free"
+    llm_fallback_model: str = "openrouter/free"
 
     @property
     def is_configured(self) -> bool:
