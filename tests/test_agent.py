@@ -1,5 +1,3 @@
-from langchain_core.messages import AIMessage, HumanMessage
-
 from line_bot.agent import (
     QUOTA_MESSAGE,
     AgentRunner,
@@ -7,6 +5,18 @@ from line_bot.agent import (
     is_rate_limit_error,
     normalize_model_slug,
 )
+
+
+class AIMessage:
+    """Lightweight stand-in (duck-types langchain's AIMessage.content)."""
+
+    def __init__(self, content):
+        self.content = content
+
+
+class HumanMessage:
+    def __init__(self, content):
+        self.content = content
 
 
 class FakeAgent:

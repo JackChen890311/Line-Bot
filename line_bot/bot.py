@@ -75,7 +75,7 @@ class EchoBot:
                 logger.warning("Agent disabled or OPENROUTER_API_KEY missing; using echo stub")
             return None
         if self._agent_runner is None:
-            from line_bot.agent import AgentRunner  # lazy: langchain import is heavy
+            from line_bot.agent import AgentRunner  # lazy: keep webhook import light
 
             try:
                 self._agent_runner = AgentRunner.from_settings(self.settings)

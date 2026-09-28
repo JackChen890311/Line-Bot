@@ -102,7 +102,7 @@ Every inbound/outbound message is appended to `data/history/<user>.jsonl`
 ## LLM agent (Phase 2)
 
 Set `AGENT_ENABLED=true` + `OPENROUTER_API_KEY` and replies come from the
-agent (`langchain` `create_agent` + `ChatOpenRouter`, no tools yet).
+agent (direct OpenRouter `chat/completions` via `httpx`, no tools yet).
 Switching models is one `.env` line (`LLM_MODEL`); on 429/errors it retries
 `LLM_FALLBACK_MODEL`, and on exhausted quota it replies
 「今天的免費額度用完了」instead of going silent. Without a key it falls back
