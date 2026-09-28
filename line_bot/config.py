@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     debug_slow_seconds: float = 0.0
     agent_enabled: bool = True
     openrouter_api_key: str = ""
-    llm_model: str = "qwen/qwen3-next-80b-a3b-instruct:free"
+    llm_model: str = "qwen/qwen3.8-27b:free"
     llm_fallback_model: str = "openrouter/free"
 
     @property
